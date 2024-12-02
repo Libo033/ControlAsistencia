@@ -21,16 +21,18 @@ export async function GET(req: NextRequest) {
     if (year || month || day) {
       year
         ? (assist = assist.filter(
-            (as) => as.created_at.year === parseInt(year)
+            (as) => new Date(as.created_at).getFullYear() === parseInt(year)
           ))
         : undefined;
       month
         ? (assist = assist.filter(
-            (as) => as.created_at.month === parseInt(month)
+            (as) => new Date(as.created_at).getMonth() === parseInt(month) - 1
           ))
         : undefined;
       day
-        ? (assist = assist.filter((as) => as.created_at.day === parseInt(day)))
+        ? (assist = assist.filter(
+            (as) => new Date(as.created_at).getDate() === parseInt(day)
+          ))
         : undefined;
 
       return Response.json(
