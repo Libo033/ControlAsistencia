@@ -1,8 +1,6 @@
-/*
 import clientPromise from "@/libs/mongodb/mongodb";
-import { Db, Document, MongoClient, WithId } from "mongodb";
+import { Db, MongoClient } from "mongodb";
 import { NextRequest } from "next/server";
-import { Assist } from "../types";
 import * as XLSX from "xlsx";
 
 export async function GET(req: NextRequest) {
@@ -15,10 +13,11 @@ export async function GET(req: NextRequest) {
     const client: MongoClient = await clientPromise;
     const db: Db = client.db("assist_control");
 
-    let assist: WithId<Document>[] = await db
-      .collection("assist")
-      .find({})
-      .toArray();
+    let assist: any = await db.collection("assist").find().toArray();
+
+    assist.forEach(
+      (as: any) => (as.created_at = as.created_at.toLocaleString())
+    );
 
     const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(assist);
 
@@ -26,7 +25,11 @@ export async function GET(req: NextRequest) {
 
     XLSX.utils.book_append_sheet(workbook, worksheet, "Assist");
 
-    const buf = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
+    const buf = XLSX.write(workbook, {
+      type: "buffer",
+      bookType: "xlsx",
+      Props: { Author: "AssistControl" },
+    });
 
     return new Response(buf, {
       status: 200,
@@ -58,7 +61,7 @@ export async function GET(req: NextRequest) {
       );
     }
   }
-}*/
+}
 
 /*
     if (year || month || day) {
