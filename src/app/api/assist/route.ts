@@ -18,6 +18,8 @@ export async function GET(req: NextRequest) {
       .find()
       .toArray();
 
+    assist.sort((a, b) => a.created_at - b.created_at);
+
     if (year || month || day) {
       year
         ? (assist = assist.filter(
