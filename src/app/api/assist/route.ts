@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
     const assist: Partial<Assist> = {
       name: data.name,
       subname: data.subname,
-      created_at: new Date(year, month, day, hour, minute),
+      created_at: new Date(Date.UTC(year, month, day, hour, minute)),
     };
 
     const added: InsertOneResult<Document> = await db
