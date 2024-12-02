@@ -1,7 +1,7 @@
 import clientPromise from "@/libs/mongodb/mongodb";
 import { Db, Document, InsertOneResult, MongoClient, WithId } from "mongodb";
 import { NextRequest } from "next/server";
-import { Assist } from "./types";
+import { Assist, AssistPost } from "./types";
 
 export async function GET(req: NextRequest) {
   try {
@@ -80,20 +80,19 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const data: Partial<Assist> = await req.json();
+    const data: Partial<AssistPost> = await req.json();
     const client: MongoClient = await clientPromise;
     const db: Db = client.db("assist_control");
+    const year: number = data.year || new Date().getFullYear();
+    const month: number = data.month ? data.month - 1 : new Date().getMonth();
+    const day: number = data.day || new Date().getDate();
+    const hour: number = data.hour || new Date().getHours();
+    const minute: number = data.minute || new Date().getMinutes();
 
     const assist: Partial<Assist> = {
       name: data.name,
       subname: data.subname,
-      created_at: {
-        year: new Date().getFullYear(),
-        month: data.created_at?.month || new Date().getMonth() + 1,
-        day: data.created_at?.day || new Date().getUTCDate(),
-        hour: data.created_at?.hour || new Date().getHours(),
-        minute: data.created_at?.minute || new Date().getMinutes(), // Descubrir porque cuando data.minute es 0 se usa new Date
-      },
+      created_at: new Date(year, month, day, hour, minute),
     };
 
     const added: InsertOneResult<Document> = await db
