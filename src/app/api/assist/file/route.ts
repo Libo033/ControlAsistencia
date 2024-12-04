@@ -19,7 +19,46 @@ export async function GET(req: NextRequest) {
       .toArray();
 
     assist.sort((a, b) => a.created_at - b.created_at);
-    assist.forEach((as) => (as.created_at = as.created_at.toLocaleString()));
+
+    if (year || month || day) {
+      year
+        ? (assist = assist.filter(
+            (as) => new Date(as.created_at).getFullYear() === parseInt(year)
+          ))
+        : undefined;
+      month
+        ? (assist = assist.filter(
+            (as) => new Date(as.created_at).getMonth() === parseInt(month) - 1
+          ))
+        : undefined;
+      day
+        ? (assist = assist.filter(
+            (as) => new Date(as.created_at).getDate() === parseInt(day)
+          ))
+        : undefined;
+
+      assist.forEach((as) => (as.created_at = as.created_at.toLocaleString()));
+
+      const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(assist);
+
+      const workbook: XLSX.WorkBook = XLSX.utils.book_new();
+
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Assist");
+
+      const buf = XLSX.write(workbook, {
+        type: "buffer",
+        bookType: "xlsx",
+        Props: { Author: "AssistControl" },
+      });
+
+      return new Response(buf, {
+        status: 200,
+        headers: {
+          "Content-Disposition": `attachment; filename="assist.xlsx"`,
+          "Content-Type": "application/vnd.ms-excel",
+        },
+      });
+    }
 
     const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(assist);
 
